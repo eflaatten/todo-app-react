@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
+import { isEditable } from '@testing-library/user-event/dist/utils';
 
 class App extends Component{
 
@@ -7,9 +8,13 @@ class App extends Component{
     super()
 
     this.state = {
-      isClicked: false,
       inputValue: '',
-      listOfTodos: []
+      listOfTodos: [],
+      editingIndex: null,
+      editingValue: '',
+      isCompleted: false,
+      isEditable: false,
+      isDraggable: true
     }
   }
 
@@ -17,10 +22,30 @@ class App extends Component{
     this.setState({inputValue : e.target.value})
   }
 
+  handleEditChange = (e) => {
+    this.setState({editingValue : e.target.value})
+  }
+
   handleSubmit = (e) => {
     e.preventDefault()
-    this.setState({listOfTodos : [...this.state.listOfTodos, this.state.inputValue]})
-    this.setState({inputValue : ''})
+    const newTodos = {
+      text: this.state.inputValue,
+      isCompleted: false,
+      isEditable: true
+    }
+
+    this.setState({
+      listOfTodos: [...this.state.listOfTodos, newTodos],
+      inputValue: ''
+    })
+  }
+
+  // Checks if a checkbox is checked
+  handleCheckboxChange = (index) => {
+    const updateTodos = [...this.state.listOfTodos]
+    updateTodos[index].isCompleted = !updateTodos[index].isCompleted
+    updateTodos[index].isEditable = !updateTodos[index].isEditable
+    this.setState({listOfTodos : updateTodos})
   }
 
   //Clears the listOfTodos array
@@ -28,11 +53,25 @@ class App extends Component{
     this.setState({listOfTodos : []})
   }
 
-  //Edit todos: convert the li to input field when clicked
-  editTodos = () => {
-    //Check if the li is clicked
-    this.setState({isClicked : true})
-    //If clicked, convert the li to input field
+  //Clear all completed todos
+  clearAllCompletedTodos = () => {
+    this.setState({listOfTodos : this.state.listOfTodos.filter(todo => !todo.isCompleted)})
+  }
+
+  // Start editing the chosen todo item
+  startEditing = (index, todo) => {
+    this.setState({ editingIndex: index, editingValue: todo.text })
+  }
+
+  // Save the edited todo item
+  saveEdit = (index) => {
+    const updateTodos = [...this.state.listOfTodos];
+    updateTodos[index].text = this.state.editingValue;
+    this.setState({
+      listOfTodos: updateTodos,
+      editingIndex: null,
+      editingValue: "",
+    });
   }
 
   render() {
@@ -40,33 +79,67 @@ class App extends Component{
       <div className='App'>
 
         <header className='App-header'>
-        <h1>List of todos</h1>
+          <h1>List of todos</h1>
 
           <form onSubmit={this.handleSubmit}>
 
             <input
               type='text'
+              placeholder='Add a todo'
               value={this.state.inputValue}
               onChange={this.handleChange}
             ></input>
 
-            <button type='button'>Clear checked todos</button>
+            <button type='button' onClick={this.clearAllCompletedTodos}>Clear completed todos</button>
             <button type='button' onClick={this.clearAllTodos}>Clear all todos</button>
           </form>
 
           <ul>
+          {this.state.listOfTodos.length === 0 && <p>No todos</p>}
             {this.state.listOfTodos.map((todo, index) => {
               return (
+
+                // Create the li element for each todo item, with editing functionality
                 <li
-                onClick={this.editTodos}
-                onChange={this.handleChange}
-                key={index}>{todo}
+                key={index}
+                style={{textDecoration: todo.isCompleted ? 'line-through' : 'none'}}
+                onDoubleClick={() => !todo.isCompleted && this.startEditing(index, todo)}
+                draggable={this.state.isDraggable}
+                >
+
+
+
+                  {/* checkbox for marking the todo item as completed */}
+                  <input
+                    type='checkbox'
+                    checked = {todo.isCompleted}
+                    onChange={() => this.handleCheckboxChange(index)}
+                    
+                  />
+
+
+
+                  {/* input field for editing the todo item */}
+                  {this.state.editingIndex === index ? (
+                    <input
+                      type='text'
+                      style={{ color: "black", borderColor: "black"}}
+                      value={this.state.editingValue}
+                      onChange={this.handleEditChange}
+                      onBlur={() => this.saveEdit(index)}
+                      onKeyPress={(e) => {
+                        if (e.key === "Enter") {
+                          this.saveEdit(index);
+                        }
+                      }}
+                    />
+                  ) : todo.text
+                  }
                 </li>
+
               );
             })}
           </ul>
-
-
         </header>
       </div>
     );
