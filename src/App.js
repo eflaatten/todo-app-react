@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 
 class App extends Component{
@@ -14,12 +13,6 @@ class App extends Component{
     }
   }
 
-  handleClick = () => {
-    this.state.isClicked ?
-    this.setState({ isClicked: false }) :
-    this.setState({ isClicked: true })
-  }
-
   handleChange = (e) => {
     this.setState({inputValue : e.target.value})
   }
@@ -30,32 +23,50 @@ class App extends Component{
     this.setState({inputValue : ''})
   }
 
+  //Clears the listOfTodos array
+  clearAllTodos = () => {
+    this.setState({listOfTodos : []})
+  }
+
+  //Edit todos: convert the li to input field when clicked
+  editTodos = () => {
+    //Check if the li is clicked
+    this.setState({isClicked : true})
+    //If clicked, convert the li to input field
+  }
+
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
+      <div className='App'>
+
+        <header className='App-header'>
+        <h1>List of todos</h1>
 
           <form onSubmit={this.handleSubmit}>
-            <input type="text" value={this.state.inputValue} onChange={this.handleChange}></input>
-            <button type="submit">Add Todo</button>
+
+            <input
+              type='text'
+              value={this.state.inputValue}
+              onChange={this.handleChange}
+            ></input>
+
+            <button type='button'>Clear checked todos</button>
+            <button type='button' onClick={this.clearAllTodos}>Clear all todos</button>
           </form>
 
-          <ol>{this.state.listOfTodos.map((todo, index) => {
-            return <li key={index}>{todo}</li>
-          })}</ol>
+          <ul>
+            {this.state.listOfTodos.map((todo, index) => {
+              return (
+                <li
+                onClick={this.editTodos}
+                onChange={this.handleChange}
+                key={index}>{todo}
+                </li>
+              );
+            })}
+          </ul>
 
-          <p>
-            {this.state.isClicked ? 'Hello World!' : 'Hello React!'}
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
+
         </header>
       </div>
     );
