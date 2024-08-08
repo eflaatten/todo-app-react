@@ -77,3 +77,20 @@
 .App-header p {
   color: black;
 }
+
+.App-header #deleteTodo {
+  background-color: rgb(255, 0, 0);
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  transition: 0.2s;
+  margin: 10px;
+  position: absolute;
+  left: 420px;
+}
+
+.App-header #deleteTodo:hover {
+  background-color: rgb(124, 0, 0);
+  color: rgb(255, 255, 255);
+  transition: 0.2s;
+}

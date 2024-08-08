@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import './App.css';
-import { isEditable } from '@testing-library/user-event/dist/utils';
+import TodoCard from './TodoCard';
 
 class App extends Component{
 
-  constructor() {
-    super()
+  constructor(props) {
+    super(props)
 
     this.state = {
       inputValue: '',
@@ -28,24 +28,21 @@ class App extends Component{
 
   handleSubmit = (e) => {
     e.preventDefault()
-    const newTodos = {
+    const newTodo = {
       text: this.state.inputValue,
       isCompleted: false,
-      isEditable: true
-    }
-
+    };
     this.setState({
-      listOfTodos: [...this.state.listOfTodos, newTodos],
-      inputValue: ''
-    })
+      listOfTodos: [...this.state.listOfTodos, newTodo],
+      inputValue: "",
+    });
   }
 
   // Checks if a checkbox is checked
   handleCheckboxChange = (index) => {
-    const updateTodos = [...this.state.listOfTodos]
-    updateTodos[index].isCompleted = !updateTodos[index].isCompleted
-    updateTodos[index].isEditable = !updateTodos[index].isEditable
-    this.setState({listOfTodos : updateTodos})
+    const updateTodos = [...this.state.listOfTodos];
+    updateTodos[index].isCompleted = !updateTodos[index].isCompleted;
+    this.setState({listOfTodos: updateTodos});
   }
 
   //Clears the listOfTodos array
@@ -58,9 +55,16 @@ class App extends Component{
     this.setState({listOfTodos : this.state.listOfTodos.filter(todo => !todo.isCompleted)})
   }
 
+  // Delete todo
+  deleteTodo = (index) => {
+    let copyOfTodos = [...this.state.listOfTodos]
+    copyOfTodos.splice(index, 1)
+    this.setState({listOfTodos : copyOfTodos})
+  }
+
   // Start editing the chosen todo item
   startEditing = (index, todo) => {
-    this.setState({ editingIndex: index, editingValue: todo.text })
+    this.setState({ editingIndex: index, editingValue: todo })
   }
 
   // Save the edited todo item
@@ -98,45 +102,19 @@ class App extends Component{
           {this.state.listOfTodos.length === 0 && <p>No todos</p>}
             {this.state.listOfTodos.map((todo, index) => {
               return (
-
-                // Create the li element for each todo item, with editing functionality
-                <li
-                key={index}
-                style={{textDecoration: todo.isCompleted ? 'line-through' : 'none'}}
-                onDoubleClick={() => !todo.isCompleted && this.startEditing(index, todo)}
-                draggable={this.state.isDraggable}
-                >
-
-
-
-                  {/* checkbox for marking the todo item as completed */}
-                  <input
-                    type='checkbox'
-                    checked = {todo.isCompleted}
-                    onChange={() => this.handleCheckboxChange(index)}
-                    
-                  />
-
-
-
-                  {/* input field for editing the todo item */}
-                  {this.state.editingIndex === index ? (
-                    <input
-                      type='text'
-                      style={{ color: "black", borderColor: "black"}}
-                      value={this.state.editingValue}
-                      onChange={this.handleEditChange}
-                      onBlur={() => this.saveEdit(index)}
-                      onKeyPress={(e) => {
-                        if (e.key === "Enter") {
-                          this.saveEdit(index);
-                        }
-                      }}
-                    />
-                  ) : todo.text
-                  }
-                </li>
-
+                <TodoCard
+                  key={index}
+                  index={index}
+                  title={todo}
+                  deleteTodo={this.deleteTodo}
+                  isCompleted={todo.isCompleted}
+                  handleCheckboxChange={this.handleCheckboxChange}
+                  editingIndex={this.state.editingIndex}
+                  editingValue={this.state.editingValue}
+                  saveEdit={this.saveEdit}
+                  handleEditChange={this.handleEditChange}
+                  startEditing={this.startEditing}
+                />
               );
             })}
           </ul>
